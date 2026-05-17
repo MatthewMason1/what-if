@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Glass Timeline Builder</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:black;
+    color:white;
+    font-family:'Zalando Sans Expanded',sans-serif;
+    overflow:hidden;
+    height:100vh;
+
+    image-rendering:auto;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+}
+
+/* BACKGROUND */
+
+.bgGlow{
+    position:fixed;
+    width:700px;
+    height:700px;
+    background:radial-gradient(circle,rgba(255,255,255,0.05),transparent 70%);
+    filter:blur(100px);
+    pointer-events:none;
+    z-index:0;
+}
+
+.bgGlow.one{
+    top:-250px;
+    left:-200px;
+}
+
+.bgGlow.two{
+    bottom:-250px;
+    right:-200px;
+}
+
+/* CONTROLS */
+
+.controls{
+    position:fixed;
+    top:20px;
+    left:20px;
+    z-index:100;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+button{
+    background:rgba(255,255,255,0.08);
+    border:none;
+    color:white;
+    padding:14px 22px;
+    border-radius:18px;
+    cursor:pointer;
+    transition:0.35s;
+    backdrop-filter:blur(14px);
+    font-family:inherit;
+    font-weight:600;
+}
+
+button:hover{
+    transform:translateY(-4px) scale(1.03);
+    background:rgba(255,255,255,0.13);
+}
+
+/* BUILDER */
+
+.builder{
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    padding:110px 40px 50px;
+}
+
+.containerGrid{
+    display:flex;
+    gap:30px;
+    flex-wrap:wrap;
+}
+
+/* CARD */
+
+.card{
+    width:320px;
+    min-height:760px;
+
+    border-radius:34px;
+
+    padding:30px;
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,0.205),
+        rgba(255,255,255,0.03)
+    );
+
+    backdrop-filter:blur(24px);
+
+    box-shadow:
+    0 8px 30px rgba(0,0,0,0.55);
+
+    transition:0.4s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+/* FORM */
+
+label{
+    font-size:12px;
+    opacity:0.8;
+    margin-bottom:8px;
+    display:block;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+input,
+textarea{
+    width:100%;
+    margin-bottom:18px;
+
+    background:rgba(255,255,255,0.06);
+
+    border:none;
+
+    color:white;
+
+    padding:14px;
+
+    border-radius:16px;
+
+    outline:none;
+
+    resize:none;
+
+    font-family:inherit;
+}
+
+textarea{
+    min-height:100px;
+}
+
+/* PREVIEW */
+
+.preview{
+    margin-top:20px;
+
+    border-radius:26px;
+
+    overflow:hidden;
+
+    padding:28px;
+
+    background:rgba(255,255,255,0.04);
+
+    text-align:center;
+}
+
+.afterText{
+    text-transform:uppercase;
+    letter-spacing:3px;
+    font-size:14px;
+    color:white;
+    opacity:1;
+}
+
+.bigNumber{
+    font-size:95px;
+    font-weight:700;
+    line-height:0.9;
+    margin-top:14px;
+}
+
+.smallWord{
+    font-size:18px;
+    font-weight:800;
+    opacity:0.82;
+    margin-top:8px;
+    margin-bottom:28px;
+}
+
+.previewTitle{
+    font-size:24px;
+    font-weight:600;
+    line-height:1.2;
+    margin-bottom:18px;
+}
+
+.previewDesc{
+    opacity:0.8;
+    line-height:1.7;
+    margin-bottom:25px;
+    font-size:14px;
+}
+
+.preview img{
+    width:100%;
+    aspect-ratio:1 / 1;
+    object-fit:cover;
+    border-radius:24px;
+    display:block;
+}
+
+/* BLACK SCREEN */
+
+.blackScreen{
+    position:fixed;
+    inset:0;
+    background:black;
+    z-index:999;
+    opacity:0;
+    pointer-events:none;
+    transition:1s;
+}
+
+.blackScreen.active{
+    opacity:1;
+    pointer-events:all;
+}
+
+/* ANIMATION VIEW */
+
+.animationView{
+    position:fixed;
+    inset:0;
+    background:black;
+    display:none;
+    align-items:center;
+    overflow:hidden;
+    z-index:1000;
+}
+
+.animationTrack{
+    display:flex;
+    gap:40px;
+    padding-left:120px;
+    transform:translateX(0);
+}
+
+/* SHOW CARD */
+
+.showCard{
+    width:350px;
+    flex-shrink:0;
+
+    min-height:760px;
+
+    opacity:0;
+
+    transform:
+    translateY(100px)
+    scale(0.82);
+
+    animation:enter 1.3s forwards;
+}
+
+@keyframes enter{
+
+    to{
+        opacity:1;
+        transform:
+        translateY(0)
+        scale(1);
+    }
+
+}
+
+.showCard:nth-child(2){
+    animation-delay:0.2s;
+}
+
+.showCard:nth-child(3){
+    animation-delay:0.4s;
+}
+
+.showCard:nth-child(4){
+    animation-delay:0.6s;
+}
+
+.showCard:nth-child(5){
+    animation-delay:0.8s;
+}
+
+.showCard:nth-child(6){
+    animation-delay:1s;
+}
+
+.showCard:nth-child(7){
+    animation-delay:1.2s;
+}
+
+.showCard:nth-child(8){
+    animation-delay:1.4s;
+}
+
+.showCard:nth-child(9){
+    animation-delay:1.6s;
+}
+
+.showCard .preview{
+    height:100%;
+}
+
+/* FADES */
+
+.fadeTop{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:160px;
+    background:linear-gradient(to bottom,black,transparent);
+    z-index:3;
+    pointer-events:none;
+}
+
+.fadeBottom{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    height:160px;
+    background:linear-gradient(to top,black,transparent);
+    z-index:3;
+    pointer-events:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bgGlow one"></div>
+<div class="bgGlow two"></div>
+
+<div class="controls">
+
+    <button id="addBtn">
+        + Add New Container
+    </button>
+
+    <button id="animateBtn">
+        ▶ Start Animation + Record
+    </button>
+
+</div>
+
+<div class="builder" id="builder">
+
+    <div class="containerGrid" id="containerGrid"></div>
+
+</div>
+
+<div class="blackScreen" id="blackScreen"></div>
+
+<div class="animationView" id="animationView">
+
+    <div class="fadeTop"></div>
+    <div class="fadeBottom"></div>
+
+    <div class="animationTrack" id="animationTrack"></div>
+
+</div>
+
+<script>
+
+const grid = document.getElementById('containerGrid');
+
+const addBtn = document.getElementById('addBtn');
+
+const animateBtn = document.getElementById('animateBtn');
+
+const blackScreen = document.getElementById('blackScreen');
+
+const animationView = document.getElementById('animationView');
+
+const animationTrack = document.getElementById('animationTrack');
+
+const builder = document.getElementById('builder');
+
+let mediaRecorder;
+
+let chunks = [];
+
+let pCount = 0;
+
+/* CREATE CARD */
+
+function createCard(){
+
+    const card = document.createElement('div');
+
+    card.className = 'card';
+
+    card.innerHTML = `
+
+    <label>Number</label>
+    <input type="number" class="numberInput" value="1">
+
+    <label>Time Word</label>
+    <input type="text" class="wordInput" value="Day">
+
+    <label>Title</label>
+    <input type="text" class="titleInput" value="The Beginning">
+
+    <label>Description</label>
+    <textarea class="descInput">Type your description here...</textarea>
+
+    <label>Image</label>
+    <input type="file" class="imageInput" accept="image/*">
+
+    <div class="preview">
+
+        <div class="afterText">
+            After
+        </div>
+
+        <div class="bigNumber">
+            1
+        </div>
+
+        <div class="smallWord">
+            Day
+        </div>
+
+        <div class="previewTitle">
+            The Beginning
+        </div>
+
+        <div class="previewDesc">
+            Type your description here...
+        </div>
+
+        <img src="https://picsum.photos/500">
+
+    </div>
+
+    `;
+
+    grid.appendChild(card);
+
+    const numberInput = card.querySelector('.numberInput');
+
+    const wordInput = card.querySelector('.wordInput');
+
+    const titleInput = card.querySelector('.titleInput');
+
+    const descInput = card.querySelector('.descInput');
+
+    const imageInput = card.querySelector('.imageInput');
+
+    const bigNumber = card.querySelector('.bigNumber');
+
+    const smallWord = card.querySelector('.smallWord');
+
+    const previewTitle = card.querySelector('.previewTitle');
+
+    const previewDesc = card.querySelector('.previewDesc');
+
+    const previewImage = card.querySelector('img');
+
+    numberInput.addEventListener('input',()=>{
+
+        bigNumber.textContent = numberInput.value;
+
+    });
+
+    wordInput.addEventListener('input',()=>{
+
+        smallWord.textContent = wordInput.value;
+
+    });
+
+    titleInput.addEventListener('input',()=>{
+
+        previewTitle.textContent = titleInput.value;
+
+    });
+
+    descInput.addEventListener('input',()=>{
+
+        previewDesc.textContent = descInput.value;
+
+    });
+
+    imageInput.addEventListener('change',(e)=>{
+
+        const file = e.target.files[0];
+
+        if(file){
+
+            const reader = new FileReader();
+
+            reader.onload = function(ev){
+
+                previewImage.src = ev.target.result;
+
+            }
+
+            reader.readAsDataURL(file);
+
+        }
+
+    });
+
+}
+
+createCard();
+
+/* ADD */
+
+addBtn.addEventListener('click',()=>{
+
+    createCard();
+
+});
+
+/* HIGH QUALITY SCREEN RECORD */
+
+async function startScreenRecording(){
+
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+
+        video:{
+            displaySurface:"browser",
+            frameRate:60,
+            width:{ ideal:3840 },
+            height:{ ideal:2160 }
+        },
+
+        audio:true,
+
+        preferCurrentTab:true
+
+    });
+
+    chunks = [];
+
+    mediaRecorder = new MediaRecorder(stream, {
+
+        mimeType:'video/webm;codecs=vp9',
+
+        videoBitsPerSecond:50000000
+
+    });
+
+    mediaRecorder.ondataavailable = e => {
+
+        if(e.data.size > 0){
+
+            chunks.push(e.data);
+
+        }
+
+    };
+
+    mediaRecorder.onstop = () => {
+
+        const blob = new Blob(chunks, {
+
+            type:'video/webm'
+
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+
+        a.href = url;
+
+        a.download = 'timeline-recording-HQ.webm';
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+    };
+
+    mediaRecorder.start(100);
+
+}
+
+/* ANIMATION */
+
+animateBtn.addEventListener('click', async () => {
+
+    /*
+    IMPORTANT:
+
+    WHEN CHROME ASKS WHAT TO RECORD:
+
+    SELECT:
+    "THIS TAB"
+
+    TURN ON:
+    ✓ SHARE TAB AUDIO
+    ✓ OPTIMIZE FOR VIDEO
+    */
+
+    document.body.style.zoom = "1";
+
+    await startScreenRecording();
+
+    animationTrack.innerHTML = '';
+
+    const previews = document.querySelectorAll('.preview');
+
+    previews.forEach(preview => {
+
+        const clone = preview.cloneNode(true);
+
+        const wrapper = document.createElement('div');
+
+        wrapper.className = 'card showCard';
+
+        wrapper.appendChild(clone);
+
+        animationTrack.appendChild(wrapper);
+
+    });
+
+    blackScreen.classList.add('active');
+
+    setTimeout(() => {
+
+        blackScreen.classList.remove('active');
+
+        animationView.style.display = 'flex';
+
+        builder.style.display = 'none';
+
+        document.querySelector('.controls').style.display = 'none';
+
+        setTimeout(() => {
+
+            const totalWidth =
+                animationTrack.scrollWidth
+                - window.innerWidth
+                + 250;
+
+            const pixelsPerSecond = 35;
+
+            const duration =
+                totalWidth / pixelsPerSecond;
+
+            animationTrack.style.transition =
+                `transform ${duration}s linear`;
+
+            animationTrack.style.transform =
+                `translateX(-${totalWidth}px)`;
+
+            /* STOP RECORDING */
+
+            setTimeout(()=>{
+
+                if(mediaRecorder &&
+                   mediaRecorder.state !== 'inactive'){
+
+                    mediaRecorder.stop();
+
+                }
+
+            }, duration * 1000 + 3000);
+
+        }, 3000);
+
+    }, 1000);
+
+});
+
+/* DOUBLE P TO EXIT */
+
+document.addEventListener('keydown',(e)=>{
+
+    if(e.key.toLowerCase() === 'p'){
+
+        pCount++;
+
+        setTimeout(()=>{
+
+            pCount = 0;
+
+        },700);
+
+        if(pCount >= 2){
+
+            animationView.style.display = 'none';
+
+            builder.style.display = 'block';
+
+            document.querySelector('.controls').style.display = 'flex';
+
+            blackScreen.classList.remove('active');
+
+            animationTrack.style.transition = 'none';
+
+            animationTrack.style.transform = 'translateX(0)';
+
+            if(mediaRecorder &&
+               mediaRecorder.state !== 'inactive'){
+
+                mediaRecorder.stop();
+
+            }
+
+            pCount = 0;
+
+        }
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
